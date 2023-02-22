@@ -1,0 +1,75 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #1d1f20;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    label {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"] {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: none;
+      border-radius: 0.25rem;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #3e8e41;
+      }
+    }
+  }
+
+  .table {
+    margin-top: 2rem;
+    table-layout: fixed;
+    table {
+      width: 80%;
+      border-collapse: collapse;
+
+      th {
+        background-color: #4caf50;
+        color: #fff;
+        text-align: left;
+        padding: 0.5rem;
+        font-weight: normal;
+      }
+
+      td {
+        border: 1px solid #ddd;
+        padding: 0.5rem;
+
+        a {
+          color: #4caf50;
+        }
+      }
+    }
+  }
+}
