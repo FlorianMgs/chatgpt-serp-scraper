@@ -4,14 +4,14 @@ import cheerio from 'cheerio';
 import styles from '../styles/Dashboard.module.scss';
 
 const countryOptions = [
-  { label: 'United States', value: 'us' },
-  { label: 'United Kingdom', value: 'uk' },
-  { label: 'Canada', value: 'ca' },
-  { label: 'Australia', value: 'au' },
-  { label: 'France', value: 'fr' },
-  { label: 'Germany', value: 'de' },
-  { label: 'Spain', value: 'es' },
-  { label: 'Italy', value: 'it' },
+  { label: 'US', value: 'us' },
+  { label: 'UK', value: 'uk' },
+  { label: 'CA', value: 'ca' },
+  { label: 'AU', value: 'au' },
+  { label: 'FR', value: 'fr' },
+  { label: 'DE', value: 'de' },
+  { label: 'ES', value: 'es' },
+  { label: 'IT', value: 'it' },
 ];
 
 const Dashboard = () => {
@@ -36,84 +36,116 @@ const Dashboard = () => {
 
       const relatedKeywords = getRelatedKeywords(res);
       setSearchResults(results);
+      console.log(results)
       setRelatedKeywords(relatedKeywords);
     } catch (err) {
-
       console.error(err);
     }
-};
+  };
 
-const getRelatedKeywords = (res) => {
-  const html = res.data;
-  const $ = cheerio.load(html);
+  const handleKeywordClick = (clickedKeyword) => {
+    setKeyword(clickedKeyword);
+    handleSearch();
+  };
 
-  const relatedKeywords = [];
-  let counter = 0;
-  $('div').each((i, el) => {
-    const text = $(el).text().trim().toLowerCase();
-    if (text.includes(keyword.toLowerCase()) && text.split(' ').length >= 2 && counter < 30) {
-      const relatedKeyword = text.replace(/[^\w\s]/gi, '');
-      if (!relatedKeywords.includes(relatedKeyword)) {
-        relatedKeywords.push(relatedKeyword);
-        counter++;
+  const getRelatedKeywords = (res) => {
+    const html = res.data;
+    const $ = cheerio.load(html);
+    const relatedKeywords = [];
+
+    $('div').each((i, el) => {
+      const text = $(el).text().trim();
+      const regex = new RegExp(`(${keyword}\\s+\\w+\\s+\\w+|\\w+\\s+${keyword}\\s+\\w+|\\w+\\s+\\w+\\s+${keyword})`, 'gi');
+      const matches = text.match(regex);
+      if (matches) {
+        matches.forEach((match) => {
+          const relatedKeyword = match.replace(/\b\w{1,2}\b/g, '').replace(/\s{2,}/g, ' ').trim();
+          if (relatedKeyword.toLowerCase() !== keyword.toLowerCase() && !relatedKeywords.includes(relatedKeyword.toLowerCase()) && relatedKeywords.length < 30) {
+            relatedKeywords.push(relatedKeyword.toLowerCase());
+          }
+        });
       }
-    }
-  });
+    });
 
-  return relatedKeywords;
-};
-return (
-<div className={styles.container}>
-<h1>Keyword Ranking Dashboard</h1>
-  <div className={styles.form}>
-    <label htmlFor="keyword">Enter a keyword:</label>
-    <input type="text" id="keyword" value={keyword} onChange={e => setKeyword(e.target.value)} />
+    return relatedKeywords;
+  };
 
-    <label htmlFor="country">Select a country:</label>
-    <select id="country" value={country} onChange={e => setCountry(e.target.value)}>
-      {countryOptions.map(option => (
-        <option key={option.value} value={option.value}>{option.label}</option>
-      ))}
-    </select>
-
-    <button onClick={handleSearch}>Search</button>
-  </div>
-
-  {searchResults.length > 0 && (
-    <div className={`${styles.table} my-table`}>
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>URL</th>
-            <th>Position</th>
-          </tr>
-        </thead>
-        <tbody>
-          {searchResults.map((result, index) => (
-            <tr key={index}>
-              <td>{result.title}</td>
-              <td><a href={result.url}>{result.url}</a></td>
-              <td>{index+1}</td>
-            </tr>
+  return (
+    <div className={styles.container}>
+      <h1>Keyword Ranking Dashboard</h1>
+      <div className={styles.form}>
+        <input
+          type="text"
+          id="keyword"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="Keyword..."
+        />
+        <select id="country" value={country} onChange={(e) => setCountry(e.target.value)}>
+          {countryOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
           ))}
-        </tbody>
-      </table>
+        </select>
+        <button onClick={handleSearch}>Search</button>
+      </div>
+  
+      {searchResults.length > 0 && (
+        <div className={`${styles.table} my-table`}>
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>URL</th>
+                <th>Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {searchResults.map((result, index) => (
+                <tr key={index}>
+                  <td>{result.title}</td>
+                  <td>
+                    <a href={result.url}>{result.url}</a>
+                  </td>
+                  <td>{index + 1}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+  
+      {relatedKeywords.length > 0 && (
+        <div className={styles.relatedKeywords}>
+          <h2>Related Keywords:</h2>
+          <div className={styles.keywordLists}>
+            <div className={styles.keywordList}>
+              {relatedKeywords.slice(0, 10).map((relatedKeyword, index) => (
+                <button key={index} onClick={() => handleKeywordClick(relatedKeyword)}>
+                  {relatedKeyword}
+                </button>
+              ))}
+            </div>
+            <div className={styles.keywordList}>
+              {relatedKeywords.slice(10, 20).map((relatedKeyword, index) => (
+                <button key={index} onClick={() => handleKeywordClick(relatedKeyword)}>
+                  {relatedKeyword}
+                </button>
+              ))}
+            </div>
+            <div className={styles.keywordList}>
+              {relatedKeywords.slice(20, 30).map((relatedKeyword, index) => (
+                <button key={index} onClick={() => handleKeywordClick(relatedKeyword)}>
+                  {relatedKeyword}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )}
+  );
+};  
 
-  {relatedKeywords.length > 0 && (
-    <div className={styles.relatedKeywords}>
-      <h2>Related Keywords:</h2>
-      <ul>
-        {relatedKeywords.map((keyword, index) => (
-          <li key={index}>{keyword}</li>
-        ))}
-      </ul>
-    </div>
-  )}
-</div>
-);
-};
-
-export default Dashboard;
+export default Dashboard;       
